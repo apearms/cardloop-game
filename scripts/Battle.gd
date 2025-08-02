@@ -484,7 +484,7 @@ func _update_display():
 	_update_hp_display()
 	_update_resources_display()
 
-func _update_hp_display():
+func _update_hp_display(_new_hp: int = 0):
 	if hp_label:
 		hp_label.text = "HP: " + str(GameState.hero_hp) + "/" + str(GameState.max_hero_hp)
 

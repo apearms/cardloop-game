@@ -150,7 +150,7 @@ func _update_wave_display():
 	if wave_label:
 		wave_label.text = "Wave " + str(GameState.current_wave)
 
-func _update_hp_display():
+func _update_hp_display(_new_hp: int = 0):
 	if hp_label:
 		hp_label.text = "HP: " + str(GameState.hero_hp) + "/" + str(GameState.max_hero_hp)
 

@@ -189,12 +189,12 @@ func _create_placeholder_texture():
 	texture.set_image(image)
 	sprite.texture = texture
 
-func _set_sprite_texture(enemy_id: String):
+func _set_sprite_texture(enemy_type: String):
 	# Create colored placeholder based on enemy type
 	var image = Image.create(32, 32, false, Image.FORMAT_RGB8)
 	var color = Color.WHITE
 
-	match enemy_id:
+	match enemy_type:
 		"Slime":
 			color = Color.GREEN
 		"Runner":
