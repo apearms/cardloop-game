@@ -1,0 +1,31 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8xvn2ywqklm"]
+
+[ext_resource type="Script" path="res://scripts/RoomSelectScene.gd" id="1_room_select"]
+
+[node name="RoomSelectScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_room_select")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="TitleLabel" type="Label" parent="VBox"]
+layout_mode = 2
+text = "Choose Your Next Challenge"
+horizontal_alignment = 1
+
+[node name="WaveLabel" type="Label" parent="VBox"]
+layout_mode = 2
+text = "Wave 2"
+horizontal_alignment = 1
+
+[node name="RoomContainer" type="VBoxContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1

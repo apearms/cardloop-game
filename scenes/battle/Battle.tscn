@@ -1,0 +1,89 @@
+[gd_scene load_steps=2 format=3 uid="uid://elddqcaejl6m"]
+
+[ext_resource type="Script" path="res://scripts/Battle.gd" id="1_battle"]
+
+[node name="Battle" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_battle")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="TopBar" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="WaveLabel" type="Label" parent="VBox/TopBar"]
+layout_mode = 2
+text = "Wave 1"
+
+[node name="HPLabel" type="Label" parent="VBox/TopBar"]
+layout_mode = 2
+text = "HP: 20/20"
+
+[node name="ResourcesLabel" type="Label" parent="VBox/TopBar"]
+layout_mode = 2
+text = "⚙️0 ✨0"
+
+[node name="BattleArea" type="VBoxContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="GridContainer" type="GridContainer" parent="VBox/BattleArea"]
+layout_mode = 2
+columns = 6
+
+[node name="SpawnQueueContainer" type="VBoxContainer" parent="VBox/BattleArea"]
+layout_mode = 2
+
+[node name="QueueLabel0" type="Label" parent="VBox/BattleArea/SpawnQueueContainer"]
+layout_mode = 2
+text = ""
+horizontal_alignment = 2
+
+[node name="QueueLabel1" type="Label" parent="VBox/BattleArea/SpawnQueueContainer"]
+layout_mode = 2
+text = ""
+horizontal_alignment = 2
+
+[node name="QueueLabel2" type="Label" parent="VBox/BattleArea/SpawnQueueContainer"]
+layout_mode = 2
+text = ""
+horizontal_alignment = 2
+
+[node name="LoopDisplay" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="VBox"]
+layout_mode = 2
+text = "Ready to battle!"
+horizontal_alignment = 1
+
+[node name="CombatLog" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = 50.0
+offset_bottom = -50.0
+visible = false
+
+[node name="LogTitle" type="Label" parent="CombatLog"]
+layout_mode = 2
+text = "Combat Log"
+horizontal_alignment = 1
+
+[node name="LogScroll" type="ScrollContainer" parent="CombatLog"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LogContainer" type="VBoxContainer" parent="CombatLog/LogScroll"]
+layout_mode = 2
+size_flags_horizontal = 3

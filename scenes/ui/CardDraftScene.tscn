@@ -1,0 +1,43 @@
+[gd_scene load_steps=2 format=3 uid="uid://bqr8xvn2ywqkl"]
+
+[ext_resource type="Script" path="res://scripts/CardDraftScene.gd" id="1_draft"]
+
+[node name="CardDraftScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_draft")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="TitleLabel" type="Label" parent="VBox"]
+layout_mode = 2
+text = "Choose Your Starting Cards"
+horizontal_alignment = 1
+
+[node name="ProgressLabel" type="Label" parent="VBox"]
+layout_mode = 2
+text = "Pick 1 of 3 (1/4)"
+horizontal_alignment = 1
+
+[node name="CardContainer" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+
+[node name="Card1" type="Button" parent="VBox/CardContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 300)
+
+[node name="Card2" type="Button" parent="VBox/CardContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 300)
+
+[node name="Card3" type="Button" parent="VBox/CardContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 300)

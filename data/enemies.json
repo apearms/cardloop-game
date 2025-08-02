@@ -1,0 +1,36 @@
+{
+  "Slime": {
+    "hp": 4,
+    "speed": 1,
+    "contact_damage": 2,
+    "ranged": false,
+    "color": "#4CAF50",
+    "description": "Basic enemy. Moves 1 tile per loop."
+  },
+  "Runner": {
+    "hp": 3,
+    "speed": 2,
+    "contact_damage": 1,
+    "ranged": false,
+    "color": "#FF9800",
+    "description": "Fast enemy. Moves 2 tiles per loop."
+  },
+  "Tank": {
+    "hp": 15,
+    "speed": 1,
+    "contact_damage": 4,
+    "ranged": false,
+    "color": "#795548",
+    "description": "Heavy enemy. High HP and damage."
+  },
+  "Boss": {
+    "hp": 60,
+    "speed": 0,
+    "contact_damage": 6,
+    "ranged": true,
+    "ranged_damage": 2,
+    "ranged_interval": 1,
+    "color": "#9C27B0",
+    "description": "Final boss. Doesn't move but attacks every loop."
+  }
+}

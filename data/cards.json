@@ -1,0 +1,113 @@
+{
+  "Strike": {
+    "type": "attack",
+    "cost": {"ammo": 0, "mana": 0},
+    "damage": 2,
+    "max_uses": -1,
+    "rarity": "common",
+    "single_copy": false,
+    "description": "Deal 2 damage to target enemy."
+  },
+  "Gunfire": {
+    "type": "attack",
+    "cost": {"ammo": 1, "mana": 0},
+    "damage": 3,
+    "max_uses": -1,
+    "rarity": "common",
+    "single_copy": false,
+    "description": "Spend 1 ammo to deal 3 damage."
+  },
+  "Reload": {
+    "type": "resource",
+    "cost": {"ammo": 0, "mana": 0},
+    "ammo_gain": 2,
+    "max_uses": -1,
+    "rarity": "common",
+    "single_copy": false,
+    "description": "Gain 2 ammo."
+  },
+  "Barrier": {
+    "type": "defense",
+    "cost": {"ammo": 0, "mana": 1},
+    "block": 3,
+    "max_uses": -1,
+    "rarity": "common",
+    "single_copy": false,
+    "description": "Spend 1 mana to block 3 damage this loop."
+  },
+  "Skip": {
+    "type": "utility",
+    "cost": {"ammo": 0, "mana": 0},
+    "max_uses": -1,
+    "rarity": "common",
+    "single_copy": false,
+    "description": "Do nothing. Useful for timing."
+  },
+  "Mana Potion": {
+    "type": "resource",
+    "cost": {"ammo": 0, "mana": 0},
+    "mana_gain": 1,
+    "max_uses": -1,
+    "rarity": "common",
+    "single_copy": false,
+    "description": "Gain 1 mana."
+  },
+  "Heavy Slash": {
+    "type": "attack",
+    "cost": {"ammo": 0, "mana": 0},
+    "requires_charge": 1,
+    "damage": 5,
+    "max_uses": -1,
+    "rarity": "rare",
+    "single_copy": true,
+    "description": "Deal 5 damage. Skips first loop to charge up."
+  },
+  "Fireball": {
+    "type": "attack",
+    "cost": {"ammo": 0, "mana": 2},
+    "damage": 4,
+    "aoe": true,
+    "max_uses": -1,
+    "rarity": "rare",
+    "single_copy": true,
+    "description": "Spend 2 mana to deal 4 damage to all enemies in target lane."
+  },
+  "Energize": {
+    "type": "resource",
+    "cost": {"ammo": 0, "mana": 0},
+    "ammo_gain": 1,
+    "mana_gain": 1,
+    "max_uses": -1,
+    "rarity": "rare",
+    "single_copy": true,
+    "description": "Gain 1 ammo and 1 mana."
+  },
+  "Apple": {
+    "type": "consumable",
+    "cost": {"ammo": 0, "mana": 0},
+    "heal": 2,
+    "max_uses": 3,
+    "rarity": "consumable",
+    "single_copy": false,
+    "description": "Heal 2 HP. (3 uses)"
+  },
+  "Bomb": {
+    "type": "consumable",
+    "cost": {"ammo": 0, "mana": 0},
+    "damage": 3,
+    "aoe": true,
+    "max_uses": 3,
+    "rarity": "consumable",
+    "single_copy": false,
+    "description": "Deal 3 damage to all enemies. (3 uses)"
+  },
+  "Flash": {
+    "type": "consumable",
+    "cost": {"ammo": 0, "mana": 0},
+    "block": 999,
+    "max_uses": 3,
+    "rarity": "consumable",
+    "single_copy": false,
+    "description": "Block all damage this loop. (3 uses)"
+  }
+}

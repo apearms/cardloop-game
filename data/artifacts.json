@@ -1,0 +1,44 @@
+{
+  "Loop-6": {
+    "slot_pattern": [6],
+    "desc": "6 card loop",
+    "category": "loop",
+    "icon": "loop.png"
+  },
+  "Loop-4x2": {
+    "slot_pattern": [4, 4],
+    "desc": "Two subloops of 4 cards each.",
+    "category": "loop",
+    "icon": "loop.png"
+  },
+  "Shield-Basic": {
+    "block": 1,
+    "desc": "+1 block/loop",
+    "category": "shield",
+    "icon": "shield.png"
+  },
+  "Armor-Pad": {
+    "hp": 3,
+    "desc": "+3 max HP",
+    "category": "armor",
+    "icon": "armor.png"
+  },
+  "Sword-Tiny": {
+    "attack": 1,
+    "desc": "+1 dmg/attack",
+    "category": "weapon",
+    "icon": "weapon.png"
+  },
+  "Wand-Spark": {
+    "mana": 1,
+    "desc": "+1 max mana",
+    "category": "magic",
+    "icon": "magic.png"
+  },
+  "Bottle-Heal": {
+    "heal": 2,
+    "desc": "Heal 2 on win",
+    "category": "consumable",
+    "icon": "consumable.png"
+  }
+}

@@ -1,0 +1,50 @@
+[gd_scene load_steps=3 format=3 uid="uid://bxm4k5n6o7p8q"]
+
+[ext_resource type="Script" path="res://scripts/DeckCardIcon.gd" id="1_deckcard"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1"]
+bg_color = Color(0.2, 0.2, 0.2, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6, 0.6, 0.6, 1)
+
+[node name="DeckCardIcon" type="Control"]
+custom_minimum_size = Vector2(64, 85)
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_deckcard")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_1")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NameLabel" type="Label" parent="VBox"]
+layout_mode = 2
+text = "Card Name"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="CostLabel" type="Label" parent="VBox"]
+layout_mode = 2
+text = "Cost: 1"
+horizontal_alignment = 1
+
+[node name="UsesLabel" type="Label" parent="VBox"]
+layout_mode = 2
+text = "Uses: 3"
+horizontal_alignment = 1
