@@ -18,6 +18,7 @@ var max_hp: int = 0
 var grid_x: int = 0
 var grid_y: int = 0
 var speed: int = 1
+var attack_type: String = "melee"
 var contact_damage: int = 1
 var ranged_damage: int = 0
 var ranged_interval: int = 0
@@ -88,8 +89,9 @@ func initialize(enemy_type: String, x: int, y: int):
 	max_hp = enemy_data.get("hp", 1)
 	current_hp = max_hp
 	speed = enemy_data.get("speed", 1)
-	contact_damage = enemy_data.get("contact_damage", 1)
-	ranged_damage = enemy_data.get("ranged_damage", 0)
+	attack_type = enemy_data.get("attack_type", "melee")
+	contact_damage = enemy_data.get("contact_dmg", 1)
+	ranged_damage = enemy_data.get("ranged_dmg", 0)
 	ranged_interval = enemy_data.get("ranged_interval", 0)
 
 	# Update display
@@ -130,8 +132,8 @@ func _flash_damage():
 	tween.tween_property(self, "modulate", Color.WHITE, 0.1)
 
 func advance():
-	var steps := min(speed, grid_x)      # can't go beyond HERO_COL
-	var target_x := grid_x - steps
+	var steps = min(speed, grid_x)      # can't go beyond HERO_COL
+	var target_x = grid_x - steps
 	if target_x < GridManager.HERO_COL:
 		target_x = GridManager.HERO_COL
 
@@ -141,20 +143,19 @@ func advance():
 		battle.request_move(self, target_x)
 
 	loop_count += 1
-	
-	# Ranged attack
-	if ranged_damage > 0 and ranged_interval > 0:
-		if loop_count % ranged_interval == 0:
-			_perform_ranged_attack()
 
-func _perform_ranged_attack():
-	# Boss ranged attack
-	emit_signal("enemy_reached_hero", self, ranged_damage)
-	
-	# Visual feedback for ranged attack
-	var tween = create_tween()
-	tween.tween_property(self, "modulate", Color.YELLOW, 0.2)
-	tween.tween_property(self, "modulate", Color.WHITE, 0.2)
+	# Perform attack based on type
+	perform_attack()
+
+func perform_attack():
+	if attack_type == "melee" and grid_x == GridManager.HERO_COL:
+		var battle = get_tree().get_first_node_in_group("battle")
+		if battle and battle.has_method("apply_contact_damage"):
+			battle.apply_contact_damage(self)
+	elif attack_type == "ranged":
+		var battle = get_tree().get_first_node_in_group("battle")
+		if battle and battle.has_method("apply_ranged_damage"):
+			battle.apply_ranged_damage(self)
 
 func get_grid_position() -> Vector2i:
 	return Vector2i(grid_x, grid_y)

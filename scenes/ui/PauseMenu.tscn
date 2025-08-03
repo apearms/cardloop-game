@@ -1,0 +1,67 @@
+[gd_scene load_steps=3 format=3 uid="uid://bpausemenu123"]
+
+[ext_resource type="Script" path="res://scripts/PauseMenu.gd" id="1_pause"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1"]
+bg_color = Color(0, 0, 0, 0.8)
+
+[node name="PauseMenu" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_pause")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_1")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(300, 400)
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/VBox"]
+layout_mode = 2
+text = "PAUSED"
+horizontal_alignment = 1
+add_theme_font_size_override("font_size", 32)
+
+[node name="Spacer1" type="Control" parent="CenterContainer/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+
+[node name="ResumeButton" type="Button" parent="CenterContainer/VBox"]
+layout_mode = 2
+text = "Resume"
+
+[node name="SaveButton" type="Button" parent="CenterContainer/VBox"]
+layout_mode = 2
+text = "Save Game"
+
+[node name="LoadButton" type="Button" parent="CenterContainer/VBox"]
+layout_mode = 2
+text = "Load Game"
+
+[node name="Spacer2" type="Control" parent="CenterContainer/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 20)
+
+[node name="QuitButton" type="Button" parent="CenterContainer/VBox"]
+layout_mode = 2
+text = "Quit to Menu"

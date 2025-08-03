@@ -2,34 +2,40 @@
   "Slime": {
     "hp": 4,
     "speed": 1,
-    "contact_damage": 2,
-    "ranged": false,
+    "attack_type": "melee",
+    "contact_dmg": 2,
     "color": "#4CAF50",
     "description": "Basic enemy. Moves 1 tile per loop."
   },
   "Runner": {
     "hp": 3,
     "speed": 2,
-    "contact_damage": 1,
-    "ranged": false,
+    "attack_type": "melee",
+    "contact_dmg": 1,
     "color": "#FF9800",
     "description": "Fast enemy. Moves 2 tiles per loop."
   },
   "Tank": {
     "hp": 15,
     "speed": 1,
-    "contact_damage": 4,
-    "ranged": false,
+    "attack_type": "melee",
+    "contact_dmg": 4,
     "color": "#795548",
     "description": "Heavy enemy. High HP and damage."
+  },
+  "Spitter": {
+    "hp": 5,
+    "speed": 1,
+    "attack_type": "ranged",
+    "ranged_dmg": 2,
+    "color": "#8BC34A",
+    "description": "Ranged enemy. Attacks from any distance."
   },
   "Boss": {
     "hp": 60,
     "speed": 0,
-    "contact_damage": 6,
-    "ranged": true,
-    "ranged_damage": 2,
-    "ranged_interval": 1,
+    "attack_type": "ranged",
+    "ranged_dmg": 2,
     "color": "#9C27B0",
     "description": "Final boss. Doesn't move but attacks every loop."
   }

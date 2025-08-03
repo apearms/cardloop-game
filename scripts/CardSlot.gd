@@ -4,6 +4,7 @@ class_name CardSlot
 # UI component for displaying and interacting with cards in the loop strip
 
 signal card_clicked(slot_index)
+signal card_selected(slot_index)
 signal drag_started(slot_index)
 signal drag_ended(slot_index, target_slot_index)
 
@@ -20,6 +21,9 @@ var is_dragging: bool = false
 var drag_offset: Vector2
 var drag_preview: Control
 var is_drag_highlighted: bool = false
+var is_selected: bool = false
+var click_start_time: float = 0.0
+var click_threshold: float = 0.2  # Time threshold to distinguish click from drag
 
 # Colors for different rarities
 var rarity_colors = {
@@ -137,23 +141,41 @@ func update_display():
 		modulate = Color.WHITE
 
 func _show_empty_slot():
-	# Hide all labels for empty slots - just show dark panel
+	# Hide all labels for empty slots - show dark panel with silver border
 	card_name_label.visible = false
 	cost_label.visible = false
 	uses_label.visible = false
-	_set_background_color(Color.DARK_GRAY)
+	_set_empty_slot_style()
 	modulate = Color.WHITE
+
+func _set_empty_slot_style():
+	# Create style with silver border for empty slots
+	var style_box = StyleBoxFlat.new()
+	style_box.bg_color = Color.DARK_GRAY
+	style_box.border_width_left = 2
+	style_box.border_width_right = 2
+	style_box.border_width_top = 2
+	style_box.border_width_bottom = 2
+	style_box.border_color = Color.SILVER  # Silver border for empty slots
+
+	# Apply the style to the background
+	background.add_theme_stylebox_override("panel", style_box)
 
 func _on_gui_input(event: InputEvent):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
+				click_start_time = Time.get_time_dict_from_system()["second"] + Time.get_time_dict_from_system()["minute"] * 60
 				_start_drag(event.position)
 			else:
+				var click_duration = (Time.get_time_dict_from_system()["second"] + Time.get_time_dict_from_system()["minute"] * 60) - click_start_time
+				if click_duration < click_threshold and not is_dragging:
+					# Short click - select/deselect
+					_toggle_selection()
 				_end_drag()
 		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 			emit_signal("card_clicked", slot_index)
-	
+
 	elif event is InputEventMouseMotion and is_dragging:
 		_update_drag(event.position)
 
@@ -227,11 +249,11 @@ func _set_background_color(color: Color):
 	background.add_theme_stylebox_override("panel", style_box)
 
 func _on_mouse_entered():
-	if not is_dragging and not is_drag_highlighted:
+	if not is_dragging and not is_drag_highlighted and not is_selected:
 		scale = Vector2(1.05, 1.05)
 
 func _on_mouse_exited():
-	if not is_dragging and not is_drag_highlighted:
+	if not is_dragging and not is_drag_highlighted and not is_selected:
 		scale = Vector2.ONE
 
 # Drag-over highlighting for empty slots
@@ -256,6 +278,28 @@ func set_drag_highlight(enabled: bool):
 
 func set_slot_index(index: int):
 	slot_index = index
+
+func _toggle_selection():
+	if card_id.is_empty():
+		return
+
+	is_selected = not is_selected
+	_update_selection_visual()
+	emit_signal("card_selected", slot_index)
+
+func _update_selection_visual():
+	if is_selected:
+		# Blue highlight for selected card
+		modulate = Color(0.7, 0.7, 1.0, 1.0)
+		scale = Vector2(1.1, 1.1)
+	else:
+		# Reset to normal
+		modulate = Color.WHITE
+		scale = Vector2.ONE
+
+func set_selected(selected: bool):
+	is_selected = selected
+	_update_selection_visual()
 
 func _create_drag_preview():
 	if drag_preview:

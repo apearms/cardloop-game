@@ -2,6 +2,9 @@ extends Control
 
 # Battle scene - handles loop execution and enemy management
 
+var pause_menu_scene = preload("res://scenes/ui/PauseMenu.tscn")
+var pause_menu: PauseMenu
+
 signal battle_won
 signal battle_lost
 
@@ -46,10 +49,34 @@ func _ready():
 		GameState.resources_changed.connect(_update_resources_display)
 
 	_start_battle()
+	_setup_pause_menu()
 
 func _input(event):
 	if event.is_action_pressed("ui_accept"):  # Tab key
 		_toggle_combat_log()
+	elif event.is_action_pressed("ui_cancel"):  # ESC key
+		_toggle_pause_menu()
+
+func _setup_pause_menu():
+	pause_menu = pause_menu_scene.instantiate()
+	add_child(pause_menu)
+	pause_menu.resume_game.connect(_on_pause_resume)
+	pause_menu.quit_to_menu.connect(_on_pause_quit)
+
+func _toggle_pause_menu():
+	if pause_menu.visible:
+		pause_menu.hide_pause_menu()
+	else:
+		pause_menu.show_pause_menu()
+
+func _on_pause_resume():
+	# Game automatically resumes when pause menu is hidden
+	pass
+
+func _on_pause_quit():
+	# Return to main menu
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/main.tscn")
 
 func _setup_ui():
 	if not wave_label:
@@ -154,9 +181,12 @@ func _start_battle():
 	
 	# Create loop display
 	_create_loop_display()
-	
-	# Start the battle loop
-	_start_loop()
+
+	# Spawn enemies immediately before first loop
+	_spawn_enemies()
+
+	# Start the first player loop
+	_start_first_player_loop()
 
 func _setup_room_enemies():
 	# Convert room enemy list to spawn data format
@@ -204,29 +234,29 @@ func _create_card_display(card_id: String, index: int) -> Control:
 
 	return card_panel
 
-func _start_loop():
+func _start_first_player_loop():
 	if battle_over:
 		return
-	
+
 	status_label.text = "Loop " + str(loop_index + 1) + " - Executing cards..."
-	
+
 	# Execute all cards in sequence
 	for i in range(GameState.deck.size()):
 		await _execute_card(i)
 		await get_tree().create_timer(0.3).timeout
-	
+
 	# Advance enemies
 	_advance_enemies()
-	
+
 	# Check end conditions
 	_check_battle_end()
-	
+
 	# Continue loop if battle not over
 	if not battle_over:
 		loop_index += 1
 		current_block = 0  # Reset block each loop
 		await get_tree().create_timer(0.5).timeout
-		_start_loop()
+		_start_first_player_loop()
 
 func _execute_card(card_index: int):
 	if card_index >= GameState.deck.size():
@@ -240,6 +270,7 @@ func _execute_card(card_index: int):
 	
 	# Create battle context
 	var battle_context = {
+		"battle": self,
 		"add_block": _add_block,
 		"get_target_enemy": _get_target_enemy,
 		"damage_enemies_in_lane": _damage_enemies_in_lane,
@@ -326,7 +357,7 @@ func _advance_enemies():
 	# Apply contact damage after all moves
 	for e in enemies:
 		if e.grid_x == GridManager.HERO_COL:
-			_apply_contact_damage(e)
+			apply_contact_damage(e)
 
 func _spawn_enemies():
 	# Clear GridManager first
@@ -346,15 +377,16 @@ func _spawn_enemies():
 					spawned = true
 					break   # stop searching lanes for this enemy
 
-			# If couldn't fit anywhere, add to preferred lane queue
+			# Only enqueue if ALL lanes are occupied (should not happen at wave start)
 			if not spawned:
+				print("Warning: Could not spawn enemy ", enemy_id, " - all lanes occupied")
 				var preferred_lane = spawn_data.get("lane", 0)
 				spawn_queue[preferred_lane] += 1
 
 		wave_spawn_data.clear()
 
 func request_move(enemy, new_x):
-	var old_x := enemy.grid_x
+	var old_x = enemy.grid_x
 	if new_x == old_x: return                 # already at target
 	if GridManager.is_free(enemy.grid_y, new_x):
 		GridManager.release_cell(enemy.grid_y, old_x)
@@ -362,7 +394,7 @@ func request_move(enemy, new_x):
 		enemy.grid_x = new_x
 		_update_enemy_position(enemy)
 
-func _apply_contact_damage(e):
+func apply_contact_damage(e):
 	# Apply damage with block
 	var actual_damage = max(0, e.contact_damage - current_block)
 	current_block = max(0, current_block - e.contact_damage)
@@ -372,6 +404,47 @@ func _apply_contact_damage(e):
 		_add_log_entry(e.enemy_id + " hit Hero for " + str(actual_damage) + " dmg")
 	else:
 		_add_log_entry(e.enemy_id + " attack blocked (" + str(e.contact_damage) + " dmg)")
+
+func apply_ranged_damage(e):
+	# Ranged attacks ignore block
+	var damage = e.ranged_damage
+	if damage > 0:
+		GameState.damage_hero(damage)
+		_add_log_entry(e.enemy_id + " shot Hero for " + str(damage) + " dmg")
+
+		# Visual feedback for ranged attack
+		var tween = create_tween()
+		e.modulate = Color.YELLOW
+		tween.tween_property(e, "modulate", Color.WHITE, 0.3)
+
+func damage_front_enemy(damage: int) -> int:
+	# Melee: only damage enemy at col 1
+	for enemy in enemies:
+		if enemy.grid_x == 1 and enemy.is_alive():
+			enemy.take_damage(damage)
+			_add_log_entry("Melee attack hit " + enemy.enemy_id + " for " + str(damage) + " dmg")
+			return damage
+
+	_add_log_entry("Melee attack missed - no enemy at range")
+	return 0
+
+func damage_frontmost_enemy(damage: int) -> int:
+	# Ranged: damage frontmost enemy regardless of distance
+	var frontmost_enemy = null
+	var closest_x = GridManager.GRID_W
+
+	for enemy in enemies:
+		if enemy.is_alive() and enemy.grid_x < closest_x:
+			closest_x = enemy.grid_x
+			frontmost_enemy = enemy
+
+	if frontmost_enemy:
+		frontmost_enemy.take_damage(damage)
+		_add_log_entry("Ranged attack hit " + frontmost_enemy.enemy_id + " for " + str(damage) + " dmg")
+		return damage
+
+	_add_log_entry("Ranged attack missed - no enemies")
+	return 0
 
 func _try_spawn_enemy_immediate(enemy_id: String, preferred_lane: int):
 	var spawn_col = GridManager.GRID_W - 1

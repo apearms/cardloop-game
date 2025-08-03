@@ -86,16 +86,29 @@ func _merge_results(target: Dictionary, source: Dictionary):
 # Execute attack card
 func _execute_attack(_battle_context: Dictionary = {}) -> Dictionary:
 	var result = {"damage_dealt": 0, "effects": []}
-	
+
 	var damage = get_property("damage", 0)
+	var range_type = get_property("range", "ranged")  # Default to ranged for backwards compatibility
+
 	if damage > 0:
-		result.damage_dealt = damage
-		
+		var battle = _battle_context.get("battle")
+		if battle:
+			if range_type == "melee":
+				# Melee: only damage enemy at col 1
+				if battle.has_method("damage_front_enemy"):
+					var actual_damage = battle.damage_front_enemy(damage)
+					result.damage_dealt = actual_damage
+			elif range_type == "ranged":
+				# Ranged: damage frontmost enemy regardless of distance
+				if battle.has_method("damage_frontmost_enemy"):
+					var actual_damage = battle.damage_frontmost_enemy(damage)
+					result.damage_dealt = actual_damage
+
 		if get_property("aoe", false):
 			result.effects.append("aoe_damage")
 		else:
 			result.effects.append("single_damage")
-	
+
 	return result
 
 # Execute resource card

@@ -18,7 +18,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_prep")
 
-[node name="VBox" type="VBoxContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -26,24 +26,28 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TopBar" type="HBoxContainer" parent="VBox"]
+[node name="VBox" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(1200, 600)
+
+[node name="TopBar" type="HBoxContainer" parent="CenterContainer/VBox"]
 layout_mode = 2
 
-[node name="WaveLabel" type="Label" parent="VBox/TopBar"]
+[node name="WaveLabel" type="Label" parent="CenterContainer/VBox/TopBar"]
 layout_mode = 2
 text = "Wave 1"
 
-[node name="HPLabel" type="Label" parent="VBox/TopBar"]
+[node name="HPLabel" type="Label" parent="CenterContainer/VBox/TopBar"]
 layout_mode = 2
 text = "HP: 20/20"
 
 
-[node name="LoopStrip" type="Panel" parent="VBox"]
+[node name="LoopStrip" type="Panel" parent="CenterContainer/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_1")
 
-[node name="LoopContainer" type="HBoxContainer" parent="VBox/LoopStrip"]
+[node name="LoopContainer" type="HBoxContainer" parent="CenterContainer/VBox/LoopStrip"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -52,70 +56,75 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
-[node name="slot_0" type="Control" parent="VBox/LoopStrip/LoopContainer"]
+[node name="slot_0" type="Control" parent="CenterContainer/VBox/LoopStrip/LoopContainer"]
 custom_minimum_size = Vector2(120, 160)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("2_cardslot")
 
-[node name="slot_1" type="Control" parent="VBox/LoopStrip/LoopContainer"]
+[node name="slot_1" type="Control" parent="CenterContainer/VBox/LoopStrip/LoopContainer"]
 custom_minimum_size = Vector2(120, 160)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("2_cardslot")
 
-[node name="slot_2" type="Control" parent="VBox/LoopStrip/LoopContainer"]
+[node name="slot_2" type="Control" parent="CenterContainer/VBox/LoopStrip/LoopContainer"]
 custom_minimum_size = Vector2(120, 160)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("2_cardslot")
 
-[node name="slot_3" type="Control" parent="VBox/LoopStrip/LoopContainer"]
+[node name="slot_3" type="Control" parent="CenterContainer/VBox/LoopStrip/LoopContainer"]
 custom_minimum_size = Vector2(120, 160)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("2_cardslot")
 
-[node name="slot_4" type="Control" parent="VBox/LoopStrip/LoopContainer"]
+[node name="slot_4" type="Control" parent="CenterContainer/VBox/LoopStrip/LoopContainer"]
 custom_minimum_size = Vector2(120, 160)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("2_cardslot")
 
-[node name="slot_5" type="Control" parent="VBox/LoopStrip/LoopContainer"]
+[node name="slot_5" type="Control" parent="CenterContainer/VBox/LoopStrip/LoopContainer"]
 custom_minimum_size = Vector2(120, 160)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("2_cardslot")
 
-[node name="slot_6" type="Control" parent="VBox/LoopStrip/LoopContainer"]
+[node name="slot_6" type="Control" parent="CenterContainer/VBox/LoopStrip/LoopContainer"]
 custom_minimum_size = Vector2(120, 160)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("2_cardslot")
 
-[node name="slot_7" type="Control" parent="VBox/LoopStrip/LoopContainer"]
+[node name="slot_7" type="Control" parent="CenterContainer/VBox/LoopStrip/LoopContainer"]
 custom_minimum_size = Vector2(120, 160)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("2_cardslot")
 
-[node name="DeckPanel" type="PanelContainer" parent="VBox"]
+[node name="DeckPanel" type="PanelContainer" parent="CenterContainer/VBox"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_2")
 
-[node name="DeckSlots" type="HBoxContainer" parent="VBox/DeckPanel"]
+[node name="ScrollContainer" type="ScrollContainer" parent="CenterContainer/VBox/DeckPanel"]
 layout_mode = 2
-size_flags_horizontal = 6
-alignment = 1
+horizontal_scroll_bar_mode = 0
+vertical_scroll_bar_mode = 1
 
-[node name="BottomBar" type="HBoxContainer" parent="VBox"]
+[node name="DeckSlots" type="GridContainer" parent="CenterContainer/VBox/DeckPanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+columns = 8
+
+[node name="BottomBar" type="HBoxContainer" parent="CenterContainer/VBox"]
 layout_mode = 2
 
-[node name="RunButton" type="Button" parent="VBox/BottomBar"]
+[node name="RunButton" type="Button" parent="CenterContainer/VBox/BottomBar"]
 layout_mode = 2
 text = "RUN LOOP"
 
-[node name="RelicBar" type="HBoxContainer" parent="VBox"]
+[node name="RelicBar" type="HBoxContainer" parent="CenterContainer/VBox"]
 layout_mode = 2
 alignment = 1

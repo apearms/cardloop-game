@@ -4,13 +4,16 @@ extends Control
 
 signal start_battle
 
-@onready var wave_label: Label = $VBox/TopBar/WaveLabel
-@onready var hp_label: Label = $VBox/TopBar/HPLabel
+var pause_menu_scene = preload("res://scenes/ui/PauseMenu.tscn")
+var pause_menu: PauseMenu
+
+@onready var wave_label: Label = $CenterContainer/VBox/TopBar/WaveLabel
+@onready var hp_label: Label = $CenterContainer/VBox/TopBar/HPLabel
 # Removed replace_banner - using drag system now
-@onready var loop_container: HBoxContainer = $VBox/LoopStrip/LoopContainer
-@onready var run_button: Button = $VBox/BottomBar/RunButton
-@onready var relic_bar: HBoxContainer = $VBox/RelicBar
-@onready var deck_slots: HBoxContainer = $VBox/DeckPanel/DeckSlots
+@onready var loop_container: HBoxContainer = $CenterContainer/VBox/LoopStrip/LoopContainer
+@onready var run_button: Button = $CenterContainer/VBox/BottomBar/RunButton
+@onready var relic_bar: HBoxContainer = $CenterContainer/VBox/RelicBar
+@onready var deck_slots: GridContainer = $CenterContainer/VBox/DeckPanel/ScrollContainer/DeckSlots
 
 var card_slots: Array[CardSlot] = []
 var deck_card_icon_scene = preload("res://scenes/ui/DeckCardIcon.tscn")
@@ -21,6 +24,7 @@ func _ready():
 	_setup_relic_bar()
 	_refresh_deck_panel()
 	_update_display()
+	_setup_pause_menu()
 
 	# Connect to game state changes
 	GameState.deck_changed.connect(_update_card_slots)
@@ -28,10 +32,35 @@ func _ready():
 	GameState.hero_hp_changed.connect(_update_hp_display)
 	GameState.artifacts_changed.connect(_setup_relic_bar)
 
+func _input(event):
+	if event.is_action_pressed("ui_cancel"):  # ESC key
+		_toggle_pause_menu()
+
 func _setup_ui():
 	# Connect buttons
 	if run_button and not run_button.pressed.is_connected(_on_run_button_pressed):
 		run_button.pressed.connect(_on_run_button_pressed)
+
+func _setup_pause_menu():
+	pause_menu = pause_menu_scene.instantiate()
+	add_child(pause_menu)
+	pause_menu.resume_game.connect(_on_pause_resume)
+	pause_menu.quit_to_menu.connect(_on_pause_quit)
+
+func _toggle_pause_menu():
+	if pause_menu.visible:
+		pause_menu.hide_pause_menu()
+	else:
+		pause_menu.show_pause_menu()
+
+func _on_pause_resume():
+	# Game automatically resumes when pause menu is hidden
+	pass
+
+func _on_pause_quit():
+	# Return to main menu
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/main.tscn")
 
 
 
@@ -136,7 +165,8 @@ func _setup_card_slots():
 			# Connect slot signals
 			if not slot.drag_ended.is_connected(_on_card_drag_ended):
 				slot.drag_ended.connect(_on_card_drag_ended)
-			# Note: gui_input signal connection removed - not needed for current functionality
+			if not slot.card_clicked.is_connected(_on_card_clicked):
+				slot.card_clicked.connect(_on_card_clicked)
 
 			subloop_container.add_child(slot)
 			card_slots.append(slot)
@@ -178,6 +208,22 @@ func _on_card_drag_ended(from_slot: int, to_slot: int):
 		if from_subloop == to_subloop:
 			# Swap cards in deck (only within same subloop)
 			GameState.swap_deck_cards(from_slot, to_slot)
+
+func _on_card_clicked(slot_index: int):
+	# Right-click to remove card from slot and return to deck_all
+	if slot_index >= 0 and slot_index < card_slots.size():
+		var slot = card_slots[slot_index]
+		var card_id = slot.get_card_id()
+
+		if not card_id.is_empty():
+			# Remove card from deck and add to deck_all
+			GameState.deck[slot_index] = ""
+			GameState.deck_all.append(card_id)
+
+			# Refresh UI
+			_refresh_deck_panel()
+			_update_card_slots()
+			GameState.emit_signal("deck_changed")
 
 # Removed replacement mode functions - now using drag system
 
