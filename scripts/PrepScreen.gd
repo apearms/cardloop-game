@@ -199,7 +199,7 @@ func _update_card_slots():
 
 	# Dynamic card size (loop slots)
 	if loop_container:
-		var slot_w := (loop_container.size.x / GameState.max_deck_size()) - 8
+		var slot_w := min(150, loop_container.size.x / GameState.max_deck_size() - 8)
 		for slot in card_slots:
 			slot.custom_minimum_size = Vector2(slot_w, slot_w * 1.34)
 
@@ -342,6 +342,10 @@ func _refresh_deck_panel():
 
 	# Always keep GridContainer visible
 	deck_slots.visible = true
+
+	# Set dynamic columns based on container width
+	if loop_container:
+		deck_slots.columns = max(1, loop_container.size.x / 70)
 
 	if GameState.deck_all.size() == 0:
 		# Show "(Deck empty)" label when no cards

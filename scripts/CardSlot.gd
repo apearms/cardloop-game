@@ -296,22 +296,28 @@ func _toggle_selection():
 	emit_signal("card_selected", slot_index)
 
 func _update_selection_visual():
-	if is_selected:
-		# White 3px border for selected card
-		var selected_style = StyleBoxFlat.new()
-		selected_style.bg_color = Color.DARK_GRAY
-		selected_style.border_width_left = 3
-		selected_style.border_width_right = 3
-		selected_style.border_width_top = 3
-		selected_style.border_width_bottom = 3
-		selected_style.border_color = Color.WHITE
-		background.add_theme_stylebox_override("panel", selected_style)
+	var border_color = Color(1, 1, 1) if is_selected else Color(0.6, 0.6, 0.6)
+
+	if card_id == "":
+		# Empty slot styling with selection border
+		var style_box = StyleBoxFlat.new()
+		style_box.bg_color = Color.DARK_GRAY
+		style_box.border_width_left = 2
+		style_box.border_width_right = 2
+		style_box.border_width_top = 2
+		style_box.border_width_bottom = 2
+		style_box.border_color = border_color
+		background.add_theme_stylebox_override("panel", style_box)
 	else:
-		# Reset to normal style
-		if card_id == "":
-			_set_empty_slot_style()
-		else:
-			_set_background_color(Color.DARK_GRAY)
+		# Card slot styling with selection border
+		var style_box = StyleBoxFlat.new()
+		style_box.bg_color = Color.DARK_GRAY
+		style_box.border_width_left = 2
+		style_box.border_width_right = 2
+		style_box.border_width_top = 2
+		style_box.border_width_bottom = 2
+		style_box.border_color = border_color
+		background.add_theme_stylebox_override("panel", style_box)
 
 func set_selected(selected: bool):
 	is_selected = selected

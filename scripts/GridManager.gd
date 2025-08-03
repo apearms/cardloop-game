@@ -5,6 +5,7 @@ extends Node
 
 const GRID_W := 6
 const GRID_H := 3
+const TILE := 32
 const HERO_COL := 0
 const SPAWN_COL := GRID_W - 1   # 5
 
@@ -50,3 +51,6 @@ func find_free_lane(start_lane: int, col: int) -> int:
 			return lane
 	
 	return -1 # No free lane found
+
+func cell_to_local(lane: int, col: int) -> Vector2:
+	return Vector2(col * TILE, lane * TILE)

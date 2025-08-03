@@ -11,7 +11,7 @@ signal battle_lost
 @onready var wave_label: Label = $CenterContainer/AspectRatioContainer/VBox/TopBar/WaveLabel
 @onready var hp_label: Label = $CenterContainer/AspectRatioContainer/VBox/TopBar/HPLabel
 @onready var resources_label: Label = $CenterContainer/AspectRatioContainer/VBox/TopBar/ResourcesLabel
-@onready var battlefield = $CenterContainer/AspectRatioContainer/VBox/BattleArea
+@onready var battlefield = $"CenterContainer/AspectRatioContainer/Battlefield"
 @onready var grid_container: GridContainer = $CenterContainer/AspectRatioContainer/VBox/BattleArea/GridContainer
 @onready var loop_display: HBoxContainer = $CenterContainer/AspectRatioContainer/VBox/LoopDisplay
 @onready var status_label: Label = $CenterContainer/AspectRatioContainer/VBox/StatusLabel
@@ -49,6 +49,10 @@ func _ready():
 		GameState.hero_hp_changed.connect(_update_hp_display)
 	if not GameState.resources_changed.is_connected(_update_resources_display):
 		GameState.resources_changed.connect(_update_resources_display)
+
+	# Play appropriate music
+	if GameState.is_boss_wave():
+		AudioManager.play_music("boss")
 
 	_start_battle()
 	_setup_pause_menu()
@@ -564,11 +568,7 @@ func _update_log_display():
 		log_container.add_child(label)
 
 func _update_enemy_position(enemy: Enemy):
-	enemy.position = _grid_to_world(enemy.grid_x, enemy.grid_y)
-
-func _grid_to_world(col: int, lane: int) -> Vector2:
-	var tile := 32
-	return battlefield.position + Vector2(col * tile, lane * tile)
+	enemy.position = battlefield.position + GridManager.cell_to_local(enemy.grid_y, enemy.grid_x)
 
 func _remove_enemy(enemy: Enemy):
 	enemies.erase(enemy)

@@ -251,4 +251,4 @@ func _on_card_to_deck(card_id: String):
 	emit_signal("reward_done", card_id)
 
 func _on_relic_selected(artifact_id: String):
-	emit_signal("reward_done", artifact_id)
+	emit_signal("reward_done", {"type": "relic", "id": artifact_id})

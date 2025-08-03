@@ -34,7 +34,12 @@ func _ready():
 
 func _unhandled_input(event):
 	if event.is_action_pressed("ui_cancel"):
-		_toggle_pause_menu()
+		if title_screen.visible:
+			# ESC on TitleScreen = quit
+			get_tree().quit()
+		else:
+			# ESC in gameplay = toggle pause
+			_toggle_pause_menu()
 
 func _setup_pause_menu():
 	pause_menu = pause_menu_scene.instantiate()
@@ -115,6 +120,25 @@ func _setup_title_screen():
 	continue_button.pressed.connect(_on_continue_game)
 	vbox.add_child(continue_button)
 
+	# Volume control
+	var volume_spacer = Control.new()
+	volume_spacer.custom_minimum_size = Vector2(0, 30)
+	vbox.add_child(volume_spacer)
+
+	var volume_label = Label.new()
+	volume_label.text = "Volume"
+	volume_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(volume_label)
+
+	var volume_slider = HSlider.new()
+	volume_slider.min_value = 0
+	volume_slider.max_value = 100
+	volume_slider.value = AudioManager.master_volume * 100
+	volume_slider.custom_minimum_size = Vector2(200, 30)
+	volume_slider.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	volume_slider.value_changed.connect(_on_volume_changed)
+	vbox.add_child(volume_slider)
+
 	# Exit button
 	var exit_button = Button.new()
 	exit_button.text = "EXIT GAME"
@@ -142,7 +166,10 @@ func _setup_title_screen():
 func show_title_screen():
 	title_screen.visible = true
 	game_container.visible = false
-	
+
+	# Play menu music
+	AudioManager.play_music("menu")
+
 	# Clear any current scene
 	if current_scene:
 		current_scene.queue_free()
@@ -158,6 +185,9 @@ func _on_start_game():
 	title_screen.visible = false
 	game_container.visible = true
 
+	# Play game music
+	AudioManager.play_music("game")
+
 	# Start with prep screen
 	load_scene(PREP_SCENE)
 
@@ -172,6 +202,9 @@ func _on_continue_game():
 
 		# Start with prep screen
 		load_scene(PREP_SCENE)
+
+func _on_volume_changed(value: float):
+	AudioManager.set_volume(value)
 
 func _on_exit_game():
 	AudioManager.play_button_click()
@@ -237,13 +270,18 @@ func _on_room_selected():
 	# Room selected, start battle
 	load_scene(BATTLE_SCENE)
 
-func _on_reward_done(selected_id: String = ""):
-	# Handle artifact rewards
-	if selected_id != "":
-		var artifact = ArtifactDB.get_artifact(selected_id)
-		if artifact.has("category"):
-			var category = artifact["category"]
-			GameState.artifacts[category] = selected_id
+func _on_reward_done(data):
+	# Handle different reward types
+	if typeof(data) == TYPE_DICTIONARY and data.has("type"):
+		if data.type == "relic":
+			var art_id = data.id
+			var artifact = ArtifactDB.get_artifact(art_id)
+			var cat = artifact.category
+			GameState.artifacts[cat] = art_id
+			GameState.emit_signal("artifacts_changed")
+	elif typeof(data) == TYPE_STRING and data != "":
+		# Legacy card reward handling
+		GameState.add_card_to_deck(data)
 
 	load_scene(PREP_SCENE)
 
