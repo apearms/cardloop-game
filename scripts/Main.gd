@@ -5,6 +5,9 @@ extends Control
 @onready var title_screen: Control = $TitleScreen
 @onready var game_container: Control = $GameContainer
 
+var pause_menu_scene = preload("res://scenes/ui/PauseMenu.tscn")
+var pause_menu: PauseMenu
+
 var current_scene: Node = null
 
 # Scene paths
@@ -19,12 +22,39 @@ const END_SCENE = "res://scenes/ui/EndScreen.tscn"
 func _ready():
 	# Set up title screen
 	_setup_title_screen()
-	
+
 	# Connect to game state signals
 	GameState.hero_hp_changed.connect(_on_hero_hp_changed)
-	
+
 	# Show title screen initially
 	show_title_screen()
+
+	# Setup pause menu
+	_setup_pause_menu()
+
+func _unhandled_input(event):
+	if event.is_action_pressed("ui_cancel"):
+		_toggle_pause_menu()
+
+func _setup_pause_menu():
+	pause_menu = pause_menu_scene.instantiate()
+	add_child(pause_menu)
+	pause_menu.resume_game.connect(_on_pause_resume)
+	pause_menu.quit_to_menu.connect(_on_pause_quit)
+
+func _toggle_pause_menu():
+	if pause_menu.visible:
+		pause_menu.hide_pause_menu()
+	else:
+		pause_menu.show_pause_menu()
+
+func _on_pause_resume():
+	# Resume from pause
+	pass
+
+func _on_pause_quit():
+	# Already on main menu, just hide pause
+	pause_menu.hide_pause_menu()
 
 func _setup_title_screen():
 	# Create title screen if it doesn't exist

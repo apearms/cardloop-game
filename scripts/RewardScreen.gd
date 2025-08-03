@@ -21,13 +21,18 @@ func _setup_ui():
 		_create_ui_structure()
 
 func _create_ui_structure():
+	# CenterContainer
+	var center_container = CenterContainer.new()
+	center_container.name = "CenterContainer"
+	center_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	center_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	add_child(center_container)
+
 	# Main VBox
 	var vbox = VBoxContainer.new()
 	vbox.name = "VBox"
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	add_child(vbox)
+	center_container.add_child(vbox)
 	
 	# Title
 	title_label = Label.new()

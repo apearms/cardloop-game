@@ -297,13 +297,21 @@ func _toggle_selection():
 
 func _update_selection_visual():
 	if is_selected:
-		# Blue highlight for selected card
-		modulate = Color(0.7, 0.7, 1.0, 1.0)
-		scale = Vector2(1.1, 1.1)
+		# White 3px border for selected card
+		var selected_style = StyleBoxFlat.new()
+		selected_style.bg_color = Color.DARK_GRAY
+		selected_style.border_width_left = 3
+		selected_style.border_width_right = 3
+		selected_style.border_width_top = 3
+		selected_style.border_width_bottom = 3
+		selected_style.border_color = Color.WHITE
+		background.add_theme_stylebox_override("panel", selected_style)
 	else:
-		# Reset to normal
-		modulate = Color.WHITE
-		scale = Vector2.ONE
+		# Reset to normal style
+		if card_id == "":
+			_set_empty_slot_style()
+		else:
+			_set_background_color(Color.DARK_GRAY)
 
 func set_selected(selected: bool):
 	is_selected = selected

@@ -4,15 +4,19 @@ extends Control
 
 signal room_selected
 
-@onready var title_label: Label = $VBox/TitleLabel
-@onready var wave_label: Label = $VBox/WaveLabel
-@onready var room_container: VBoxContainer = $VBox/RoomContainer
+@onready var title_label: Label = $CenterContainer/VBox/TitleLabel
+@onready var wave_label: Label = $CenterContainer/VBox/WaveLabel
+@onready var room_container: VBoxContainer = $CenterContainer/VBox/RoomContainer
 
 var room_options: Array[Dictionary] = []
 
 func _ready():
 	_setup_room_options()
 	_create_room_buttons()
+
+func _unhandled_input(event):
+	if event.is_action_pressed("ui_cancel"):
+		GlobalPause.toggle_pause()
 
 func _setup_room_options():
 	room_options.clear()

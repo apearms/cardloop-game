@@ -29,14 +29,17 @@ func _ready():
 	_update_display()
 	_setup_pause_menu()
 
+	# Ensure deck panel is refreshed after layout
+	call_deferred("_refresh_deck_panel")
+
 	# Connect to game state changes
 	GameState.deck_changed.connect(_update_card_slots)
 	GameState.deck_changed.connect(_refresh_deck_panel)
 	GameState.hero_hp_changed.connect(_update_hp_display)
 	GameState.artifacts_changed.connect(_setup_relic_bar)
 
-func _input(_event):
-	if Input.is_action_pressed("ui_cancel"):
+func _unhandled_input(event):
+	if event.is_action_pressed("ui_cancel"):
 		GlobalPause.toggle_pause()
 
 func _setup_ui():
@@ -194,16 +197,11 @@ func _update_card_slots():
 	while GameState.deck.size() < max_size:
 		GameState.deck.append("")
 
-	# Compute dynamic slot size based on container width
+	# Dynamic card size (loop slots)
 	if loop_container:
-		var container_width = loop_container.size.x
-		if container_width > 0:
-			var slot_width = (container_width / max_size) - 8
-			slot_width = max(slot_width, 80)  # Minimum width
-
-			# Update slot sizes
-			for slot in card_slots:
-				slot.custom_minimum_size.x = slot_width
+		var slot_w := (loop_container.size.x / GameState.max_deck_size()) - 8
+		for slot in card_slots:
+			slot.custom_minimum_size = Vector2(slot_w, slot_w * 1.34)
 
 	# Update each slot with corresponding deck card (up to max_deck_size)
 	for i in range(min(card_slots.size(), max_size)):
@@ -277,6 +275,9 @@ func _setup_relic_bar():
 			# Set tooltip with artifact description
 			var artifact = ArtifactDB.get_artifact(artifact_id)
 			slot.tooltip_text = artifact.get("desc", "No description")
+
+			# Add right-click to discard
+			slot.gui_input.connect(_on_artifact_input.bind(category))
 		else:
 			# Empty slot - dark frame
 			_create_empty_artifact_slot(slot)
@@ -302,6 +303,27 @@ func _create_artifact_placeholder(slot: TextureRect, category: String):
 	texture.set_image(image)
 	slot.texture = texture
 
+func _on_artifact_input(category: String, event: InputEvent):
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			_show_discard_dialog(category)
+
+func _show_discard_dialog(category: String):
+	var artifact_id = GameState.artifacts.get(category, "")
+	if artifact_id == "":
+		return
+
+	var dialog = AcceptDialog.new()
+	dialog.title = "Discard Artifact"
+	dialog.dialog_text = "Discard " + artifact_id + "?"
+	add_child(dialog)
+	dialog.confirmed.connect(_discard_artifact.bind(category))
+	dialog.popup_centered()
+
+func _discard_artifact(category: String):
+	GameState.artifacts[category] = ""
+	GameState.emit_signal("artifacts_changed")
+
 func _create_empty_artifact_slot(slot: TextureRect):
 	# Dark frame for empty slot
 	var image = Image.create(32, 32, false, Image.FORMAT_RGB8)
@@ -322,9 +344,9 @@ func _refresh_deck_panel():
 	deck_slots.visible = true
 
 	if GameState.deck_all.size() == 0:
-		# Show "(Empty)" label when no cards
+		# Show "(Deck empty)" label when no cards
 		var empty_label = Label.new()
-		empty_label.text = "(Empty)"
+		empty_label.text = "(Deck empty)"
 		empty_label.modulate = Color.GRAY
 		empty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		deck_slots.add_child(empty_label)

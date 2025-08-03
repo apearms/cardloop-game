@@ -18,19 +18,16 @@ func _ready():
 	save_button.pressed.connect(_on_save_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
 
-	# Register with GlobalPause
-	GlobalPause.register_pause_menu(self)
-
 	# Initially hidden
 	visible = false
 
 func show_pause_menu():
 	visible = true
-	GlobalPause._pause()
+	GlobalPause.toggle_pause()
 
 func hide_pause_menu():
 	visible = false
-	GlobalPause._unpause()
+	GlobalPause.toggle_pause()
 
 func _on_resume_pressed():
 	hide_pause_menu()

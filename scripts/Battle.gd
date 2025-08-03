@@ -11,6 +11,7 @@ signal battle_lost
 @onready var wave_label: Label = $CenterContainer/AspectRatioContainer/VBox/TopBar/WaveLabel
 @onready var hp_label: Label = $CenterContainer/AspectRatioContainer/VBox/TopBar/HPLabel
 @onready var resources_label: Label = $CenterContainer/AspectRatioContainer/VBox/TopBar/ResourcesLabel
+@onready var battlefield = $CenterContainer/AspectRatioContainer/VBox/BattleArea
 @onready var grid_container: GridContainer = $CenterContainer/AspectRatioContainer/VBox/BattleArea/GridContainer
 @onready var loop_display: HBoxContainer = $CenterContainer/AspectRatioContainer/VBox/LoopDisplay
 @onready var status_label: Label = $CenterContainer/AspectRatioContainer/VBox/StatusLabel
@@ -55,7 +56,10 @@ func _ready():
 func _input(event):
 	if event.is_action_pressed("ui_accept"):  # Tab key
 		_toggle_combat_log()
-	# ESC handling moved to GlobalPause singleton
+
+func _unhandled_input(event):
+	if event.is_action_pressed("ui_cancel"):
+		GlobalPause.toggle_pause()
 
 func _setup_pause_menu():
 	pause_menu = pause_menu_scene.instantiate()
@@ -442,7 +446,7 @@ func damage_frontmost_enemy(damage: int) -> int:
 	return 0
 
 func _try_spawn_enemy_immediate(enemy_id: String, preferred_lane: int):
-	var spawn_col = GridManager.GRID_W - 1
+	var spawn_col = GridManager.SPAWN_COL
 
 	# Try lanes top to bottom starting from preferred
 	for lane_offset in range(GridManager.GRID_H):
@@ -457,7 +461,7 @@ func _try_spawn_enemy_immediate(enemy_id: String, preferred_lane: int):
 	_update_spawn_queue_display()
 
 func _try_spawn_enemy(enemy_id: String, lane: int):
-	var spawn_col = GridManager.GRID_W - 1
+	var spawn_col = GridManager.SPAWN_COL
 
 	# Check if spawn position is free
 	if GridManager.is_free(lane, spawn_col):
@@ -560,13 +564,11 @@ func _update_log_display():
 		log_container.add_child(label)
 
 func _update_enemy_position(enemy: Enemy):
-	var pos = enemy.get_grid_position()
-	if pos.x >= 0 and pos.x < grid_width and pos.y >= 0 and pos.y < grid_height:
-		var cell_index = pos.y * grid_width + pos.x
-		if cell_index < grid_container.get_child_count():
-			var cell = grid_container.get_child(cell_index)
-			enemy.position = cell.position
-			enemy.size = cell.size
+	enemy.position = _grid_to_world(enemy.grid_x, enemy.grid_y)
+
+func _grid_to_world(col: int, lane: int) -> Vector2:
+	var tile := 32
+	return battlefield.position + Vector2(col * tile, lane * tile)
 
 func _remove_enemy(enemy: Enemy):
 	enemies.erase(enemy)
