@@ -14,6 +14,7 @@ signal icon_drag_ended(card_id, global_position)
 var card_id: String = ""
 var is_dragging: bool = false
 var drag_preview: Control = null
+var last_highlighted_slot: CardSlot = null
 
 func _ready():
 	custom_minimum_size = Vector2(64, 85)
@@ -23,6 +24,26 @@ func _ready():
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
 	gui_input.connect(_on_gui_input)
+
+func _process(_delta):
+	if is_dragging and drag_preview:
+		# Update drag preview position
+		drag_preview.global_position = get_global_mouse_position() - drag_preview.size / 2
+
+		# Handle drag-over highlighting
+		var prep_screen = get_tree().get_first_node_in_group("prep_screen")
+		if prep_screen and prep_screen.has_method("_find_loop_slot_at"):
+			var current_slot = prep_screen._find_loop_slot_at(get_global_mouse_position())
+
+			# Clear previous highlight
+			if last_highlighted_slot and last_highlighted_slot != current_slot:
+				last_highlighted_slot.set_drag_over_highlight(false)
+
+			# Set new highlight
+			if current_slot and current_slot != last_highlighted_slot:
+				current_slot.set_drag_over_highlight(true)
+
+			last_highlighted_slot = current_slot
 
 func set_card(id: String):
 	card_id = id
@@ -101,6 +122,12 @@ func _start_drag(_start_pos: Vector2):
 func _end_drag():
 	if is_dragging:
 		is_dragging = false
+
+		# Clear any remaining highlight
+		if last_highlighted_slot:
+			last_highlighted_slot.set_drag_over_highlight(false)
+			last_highlighted_slot = null
+
 		var global_pos = global_position + get_global_mouse_position() - global_position
 		emit_signal("icon_drag_ended", card_id, global_pos)
 		_destroy_drag_preview()

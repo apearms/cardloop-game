@@ -149,17 +149,25 @@ func _show_empty_slot():
 	modulate = Color.WHITE
 
 func _set_empty_slot_style():
-	# Create style with silver border for empty slots
+	# Create style with #777 border for empty slots
 	var style_box = StyleBoxFlat.new()
 	style_box.bg_color = Color.DARK_GRAY
 	style_box.border_width_left = 2
 	style_box.border_width_right = 2
 	style_box.border_width_top = 2
 	style_box.border_width_bottom = 2
-	style_box.border_color = Color.SILVER  # Silver border for empty slots
+	style_box.border_color = Color("#777777")  # Gray border for empty slots
 
 	# Apply the style to the background
 	background.add_theme_stylebox_override("panel", style_box)
+
+func set_drag_over_highlight(enabled: bool):
+	# Highlight empty slot during drag over
+	if card_id == "":
+		if enabled:
+			modulate = Color(1, 1, 1, 0.6)  # Indicate drop target
+		else:
+			modulate = Color.WHITE  # Normal state
 
 func _on_gui_input(event: InputEvent):
 	if event is InputEventMouseButton:

@@ -24,6 +24,8 @@ EnemyDB="*res://scripts/EnemyDB.gd"
 AudioManager="*res://scripts/AudioManager.gd"
 GridManager="*res://scripts/GridManager.gd"
 ArtifactDB="*res://scripts/ArtifactDB.gd"
+SaveManager="*res://scripts/SaveManager.gd"
+GlobalPause="*res://scripts/GlobalPause.gd"
 
 [display]
 

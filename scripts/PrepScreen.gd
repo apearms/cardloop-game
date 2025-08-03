@@ -19,6 +19,9 @@ var card_slots: Array[CardSlot] = []
 var deck_card_icon_scene = preload("res://scenes/ui/DeckCardIcon.tscn")
 
 func _ready():
+	# Add to group for drag system
+	add_to_group("prep_screen")
+
 	_setup_ui()
 	_setup_card_slots()
 	_setup_relic_bar()
@@ -32,9 +35,9 @@ func _ready():
 	GameState.hero_hp_changed.connect(_update_hp_display)
 	GameState.artifacts_changed.connect(_setup_relic_bar)
 
-func _input(event):
-	if event.is_action_pressed("ui_cancel"):  # ESC key
-		_toggle_pause_menu()
+func _input(_event):
+	if Input.is_action_pressed("ui_cancel"):
+		GlobalPause.toggle_pause()
 
 func _setup_ui():
 	# Connect buttons
@@ -191,6 +194,17 @@ func _update_card_slots():
 	while GameState.deck.size() < max_size:
 		GameState.deck.append("")
 
+	# Compute dynamic slot size based on container width
+	if loop_container:
+		var container_width = loop_container.size.x
+		if container_width > 0:
+			var slot_width = (container_width / max_size) - 8
+			slot_width = max(slot_width, 80)  # Minimum width
+
+			# Update slot sizes
+			for slot in card_slots:
+				slot.custom_minimum_size.x = slot_width
+
 	# Update each slot with corresponding deck card (up to max_deck_size)
 	for i in range(min(card_slots.size(), max_size)):
 		var slot = card_slots[i]
@@ -304,15 +318,26 @@ func _refresh_deck_panel():
 	for child in deck_slots.get_children():
 		child.queue_free()
 
-	# Create icon for each card in deck_all
-	for id in GameState.deck_all:
-		var icon = deck_card_icon_scene.instantiate()
-		# Connect drag signals
-		icon.icon_drag_started.connect(_on_icon_drag_started)
-		icon.icon_drag_ended.connect(_on_icon_drag_ended)
-		deck_slots.add_child(icon)
-		# Set card data after adding to scene tree (ensures @onready vars are ready)
-		icon.call_deferred("set_card", id)
+	# Always keep GridContainer visible
+	deck_slots.visible = true
+
+	if GameState.deck_all.size() == 0:
+		# Show "(Empty)" label when no cards
+		var empty_label = Label.new()
+		empty_label.text = "(Empty)"
+		empty_label.modulate = Color.GRAY
+		empty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		deck_slots.add_child(empty_label)
+	else:
+		# Create icon for each card in deck_all
+		for id in GameState.deck_all:
+			var icon = deck_card_icon_scene.instantiate()
+			# Connect drag signals
+			icon.icon_drag_started.connect(_on_icon_drag_started)
+			icon.icon_drag_ended.connect(_on_icon_drag_ended)
+			deck_slots.add_child(icon)
+			# Set card data after adding to scene tree (ensures @onready vars are ready)
+			icon.call_deferred("set_card", id)
 
 func _on_icon_drag_started(_card_id: String):
 	# Visual feedback for drag start

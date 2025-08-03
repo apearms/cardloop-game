@@ -8,6 +8,10 @@ const GRID_H := 3
 const HERO_COL := 0
 const SPAWN_COL := GRID_W - 1   # 5
 
+
+var grid_width : int = GRID_W
+var grid_height: int = GRID_H
+
 var occupancy := Array() # 2D bool array [lane][column]
 
 func _ready():

@@ -9,57 +9,65 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1_battle")
 
-[node name="VBox" type="VBoxContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="TopBar" type="HBoxContainer" parent="VBox"]
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="CenterContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(960, 540)
+stretch_mode = 1
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/AspectRatioContainer"]
 layout_mode = 2
 
-[node name="WaveLabel" type="Label" parent="VBox/TopBar"]
+[node name="TopBar" type="HBoxContainer" parent="CenterContainer/AspectRatioContainer/VBox"]
+layout_mode = 2
+
+[node name="WaveLabel" type="Label" parent="CenterContainer/AspectRatioContainer/VBox/TopBar"]
 layout_mode = 2
 text = "Wave 1"
 
-[node name="HPLabel" type="Label" parent="VBox/TopBar"]
+[node name="HPLabel" type="Label" parent="CenterContainer/AspectRatioContainer/VBox/TopBar"]
 layout_mode = 2
 text = "HP: 20/20"
 
-[node name="ResourcesLabel" type="Label" parent="VBox/TopBar"]
+[node name="ResourcesLabel" type="Label" parent="CenterContainer/AspectRatioContainer/VBox/TopBar"]
 layout_mode = 2
 text = "⚙️0 ✨0"
 
-[node name="BattleArea" type="VBoxContainer" parent="VBox"]
+[node name="BattleArea" type="VBoxContainer" parent="CenterContainer/AspectRatioContainer/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="GridContainer" type="GridContainer" parent="VBox/BattleArea"]
+[node name="GridContainer" type="GridContainer" parent="CenterContainer/AspectRatioContainer/VBox/BattleArea"]
 layout_mode = 2
 columns = 6
 
-[node name="SpawnQueueContainer" type="VBoxContainer" parent="VBox/BattleArea"]
+[node name="SpawnQueueContainer" type="VBoxContainer" parent="CenterContainer/AspectRatioContainer/VBox/BattleArea"]
 layout_mode = 2
 
-[node name="QueueLabel0" type="Label" parent="VBox/BattleArea/SpawnQueueContainer"]
-layout_mode = 2
-text = ""
-horizontal_alignment = 2
-
-[node name="QueueLabel1" type="Label" parent="VBox/BattleArea/SpawnQueueContainer"]
+[node name="QueueLabel0" type="Label" parent="CenterContainer/AspectRatioContainer/VBox/BattleArea/SpawnQueueContainer"]
 layout_mode = 2
 text = ""
 horizontal_alignment = 2
 
-[node name="QueueLabel2" type="Label" parent="VBox/BattleArea/SpawnQueueContainer"]
+[node name="QueueLabel1" type="Label" parent="CenterContainer/AspectRatioContainer/VBox/BattleArea/SpawnQueueContainer"]
 layout_mode = 2
 text = ""
 horizontal_alignment = 2
 
-[node name="LoopDisplay" type="HBoxContainer" parent="VBox"]
+[node name="QueueLabel2" type="Label" parent="CenterContainer/AspectRatioContainer/VBox/BattleArea/SpawnQueueContainer"]
+layout_mode = 2
+text = ""
+horizontal_alignment = 2
+
+[node name="LoopDisplay" type="HBoxContainer" parent="CenterContainer/AspectRatioContainer/VBox"]
 layout_mode = 2
 
-[node name="StatusLabel" type="Label" parent="VBox"]
+[node name="StatusLabel" type="Label" parent="CenterContainer/AspectRatioContainer/VBox"]
 layout_mode = 2
 text = "Ready to battle!"
 horizontal_alignment = 1

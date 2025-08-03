@@ -8,16 +8,16 @@ var pause_menu: PauseMenu
 signal battle_won
 signal battle_lost
 
-@onready var wave_label: Label = $VBox/TopBar/WaveLabel
-@onready var hp_label: Label = $VBox/TopBar/HPLabel
-@onready var resources_label: Label = $VBox/TopBar/ResourcesLabel
-@onready var grid_container: GridContainer = $VBox/BattleArea/GridContainer
-@onready var loop_display: HBoxContainer = $VBox/LoopDisplay
-@onready var status_label: Label = $VBox/StatusLabel
+@onready var wave_label: Label = $CenterContainer/AspectRatioContainer/VBox/TopBar/WaveLabel
+@onready var hp_label: Label = $CenterContainer/AspectRatioContainer/VBox/TopBar/HPLabel
+@onready var resources_label: Label = $CenterContainer/AspectRatioContainer/VBox/TopBar/ResourcesLabel
+@onready var grid_container: GridContainer = $CenterContainer/AspectRatioContainer/VBox/BattleArea/GridContainer
+@onready var loop_display: HBoxContainer = $CenterContainer/AspectRatioContainer/VBox/LoopDisplay
+@onready var status_label: Label = $CenterContainer/AspectRatioContainer/VBox/StatusLabel
 @onready var queue_labels: Array[Label] = [
-	$VBox/BattleArea/SpawnQueueContainer/QueueLabel0,
-	$VBox/BattleArea/SpawnQueueContainer/QueueLabel1,
-	$VBox/BattleArea/SpawnQueueContainer/QueueLabel2
+	$CenterContainer/AspectRatioContainer/VBox/BattleArea/SpawnQueueContainer/QueueLabel0,
+	$CenterContainer/AspectRatioContainer/VBox/BattleArea/SpawnQueueContainer/QueueLabel1,
+	$CenterContainer/AspectRatioContainer/VBox/BattleArea/SpawnQueueContainer/QueueLabel2
 ]
 @onready var combat_log: VBoxContainer = $CombatLog
 @onready var log_container: VBoxContainer = $CombatLog/LogScroll/LogContainer
@@ -31,7 +31,8 @@ var battle_over: bool = false
 var current_block: int = 0
 var wave_spawn_data: Array[Dictionary] = []
 var spawn_timer: float = 0.0
-var spawn_queue: Array[int] = [] # Queue count per lane
+#var spawn_queue: Array[String] = [] # Queue of enemy IDs to spawn
+var spawn_queue := [0, 0, 0]   # one counter per lane
 var combat_log_entries: Array[String] = []
 const MAX_LOG_ENTRIES = 50
 
@@ -54,8 +55,7 @@ func _ready():
 func _input(event):
 	if event.is_action_pressed("ui_accept"):  # Tab key
 		_toggle_combat_log()
-	elif event.is_action_pressed("ui_cancel"):  # ESC key
-		_toggle_pause_menu()
+	# ESC handling moved to GlobalPause singleton
 
 func _setup_pause_menu():
 	pause_menu = pause_menu_scene.instantiate()
@@ -168,7 +168,7 @@ func _start_battle():
 
 	# Initialize grid and spawn queue
 	GridManager.clear()
-	spawn_queue = [0, 0, 0] # 3 lanes
+	spawn_queue = [] # Clear enemy queue
 
 	# Reset resources
 	GameState.reset_resources()
@@ -183,7 +183,12 @@ func _start_battle():
 	_create_loop_display()
 
 	# Spawn enemies immediately before first loop
-	_spawn_enemies()
+	if not wave_spawn_data.is_empty():
+		var enemy_list: Array[String] = []
+		for spawn_data in wave_spawn_data:
+			enemy_list.append(spawn_data.enemy_id)
+		_spawn_enemies_immediate(enemy_list)
+		wave_spawn_data.clear()
 
 	# Start the first player loop
 	_start_first_player_loop()
@@ -359,31 +364,21 @@ func _advance_enemies():
 		if e.grid_x == GridManager.HERO_COL:
 			apply_contact_damage(e)
 
+func _spawn_enemies_immediate(enemy_list: Array[String]):
+	for enemy_id in enemy_list:
+		var spawned := false
+		for lane in range(GridManager.GRID_H):
+			if GridManager.is_free(lane, GridManager.SPAWN_COL):
+				_spawn_enemy(enemy_id, lane, GridManager.SPAWN_COL)
+				spawned = true
+				break
+		if not spawned:
+			spawn_queue.append(enemy_id)   # queue if no free lane
+
 func _spawn_enemies():
-	# Clear GridManager first
-	GridManager.clear()
-
-	# Spawn all enemies immediately at wave start
-	if loop_index == 0 and not wave_spawn_data.is_empty():
-		# Iterate wave list → for each enemy
-		for spawn_data in wave_spawn_data:
-			var enemy_id = spawn_data.enemy_id
-			var spawned = false
-
-			# Try all lanes for this enemy
-			for lane in range(GridManager.GRID_H):
-				if GridManager.is_free(lane, GridManager.SPAWN_COL):
-					_spawn_enemy(enemy_id, lane, GridManager.SPAWN_COL)
-					spawned = true
-					break   # stop searching lanes for this enemy
-
-			# Only enqueue if ALL lanes are occupied (should not happen at wave start)
-			if not spawned:
-				print("Warning: Could not spawn enemy ", enemy_id, " - all lanes occupied")
-				var preferred_lane = spawn_data.get("lane", 0)
-				spawn_queue[preferred_lane] += 1
-
-		wave_spawn_data.clear()
+	# This function is now used for ongoing spawns during battle
+	# Initial spawns are handled by _spawn_enemies_immediate()
+	pass
 
 func request_move(enemy, new_x):
 	var old_x = enemy.grid_x
@@ -457,6 +452,7 @@ func _try_spawn_enemy_immediate(enemy_id: String, preferred_lane: int):
 			return
 
 	# If all lanes full, add to spawn queue
+	#var spawn_queue := [0,0,0]   # one counter per lane
 	spawn_queue[preferred_lane] += 1
 	_update_spawn_queue_display()
 
@@ -473,6 +469,7 @@ func _try_spawn_enemy(enemy_id: String, lane: int):
 			_spawn_enemy(enemy_id, free_lane, spawn_col)
 		else:
 			# All lanes blocked, enqueue spawn
+			#var spawn_queue := [0,0,0]   # one counter per lane
 			spawn_queue[lane] += 1
 			_update_spawn_queue_display()
 
@@ -498,21 +495,35 @@ func _spawn_enemy(enemy_id: String, lane: int, col: int):
 	tween.tween_property(enemy, "scale", Vector2.ONE, 0.3)
 
 func _dequeue_spawns():
-	# Pop as many queued enemies as there are free lanes in that lane
-	for lane in range(spawn_queue.size()):
-		var spawn_col = GridManager.GRID_W - 1
-		while spawn_queue[lane] > 0 and GridManager.is_free(lane, spawn_col):
-			# Spawn a generic enemy (we'll need to track enemy types in queue later)
-			_spawn_enemy("Slime", lane, spawn_col)
-			spawn_queue[lane] -= 1
+	# Process spawn queue until lanes are full each turn
+	var spawned_this_turn = []
+	for enemy_id in spawn_queue:
+		var spawned = false
+		for lane in range(GridManager.GRID_H):
+			if GridManager.is_free(lane, GridManager.SPAWN_COL):
+				_spawn_enemy(enemy_id, lane, GridManager.SPAWN_COL)
+				spawned_this_turn.append(enemy_id)
+				spawned = true
+				break
+		if not spawned:
+			break  # No more free lanes, stop processing queue
+
+	# Remove spawned enemies from queue
+	for enemy_id in spawned_this_turn:
+		spawn_queue.erase(enemy_id)
 
 	# Update queue display
 	_update_spawn_queue_display()
 
 func _update_spawn_queue_display():
+	# Count enemies per lane in queue (simplified display)
+	var lane_counts = [0, 0, 0]
+	for i in range(min(spawn_queue.size(), 3)):
+		lane_counts[i % 3] += 1
+
 	for i in range(queue_labels.size()):
-		if i < spawn_queue.size() and spawn_queue[i] > 0:
-			queue_labels[i].text = "+" + str(spawn_queue[i])
+		if lane_counts[i] > 0:
+			queue_labels[i].text = "+" + str(lane_counts[i])
 		else:
 			queue_labels[i].text = ""
 

@@ -39,12 +39,15 @@ func _setup_title_screen():
 	for child in title_screen.get_children():
 		child.queue_free()
 	
-	# Create title UI
+	# Create title UI with CenterContainer
+	var center_container = CenterContainer.new()
+	center_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	center_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	title_screen.add_child(center_container)
+
 	var vbox = VBoxContainer.new()
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	title_screen.add_child(vbox)
+	center_container.add_child(vbox)
 	
 	# Title label
 	var title_label = Label.new()
@@ -72,6 +75,23 @@ func _setup_title_screen():
 	start_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	start_button.pressed.connect(_on_start_game)
 	vbox.add_child(start_button)
+
+	# Continue button
+	var continue_button = Button.new()
+	continue_button.text = "CONTINUE GAME"
+	continue_button.custom_minimum_size = Vector2(200, 50)
+	continue_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	continue_button.disabled = not SaveManager.has_valid_save()
+	continue_button.pressed.connect(_on_continue_game)
+	vbox.add_child(continue_button)
+
+	# Exit button
+	var exit_button = Button.new()
+	exit_button.text = "EXIT GAME"
+	exit_button.custom_minimum_size = Vector2(200, 50)
+	exit_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	exit_button.pressed.connect(_on_exit_game)
+	vbox.add_child(exit_button)
 	
 	# Instructions
 	var instructions = Label.new()
@@ -110,6 +130,22 @@ func _on_start_game():
 
 	# Start with prep screen
 	load_scene(PREP_SCENE)
+
+func _on_continue_game():
+	AudioManager.play_button_click()
+
+	# Load saved game
+	if SaveManager.load_game():
+		# Hide title screen
+		title_screen.visible = false
+		game_container.visible = true
+
+		# Start with prep screen
+		load_scene(PREP_SCENE)
+
+func _on_exit_game():
+	AudioManager.play_button_click()
+	get_tree().quit()
 
 func load_scene(scene_path: String):
 	# Clear current scene
