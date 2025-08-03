@@ -25,12 +25,12 @@ func _ready():
 	_setup_ui()
 	_setup_card_slots()
 	_setup_relic_bar()
-	_refresh_deck_panel()
 	_update_display()
 	_setup_pause_menu()
 
 	# Ensure deck panel is refreshed after layout
-	call_deferred("_refresh_deck_panel")
+	await get_tree().process_frame
+	_refresh_deck_panel()
 
 	# Connect to game state changes
 	GameState.deck_changed.connect(_update_card_slots)
@@ -199,7 +199,7 @@ func _update_card_slots():
 
 	# Dynamic card size (loop slots)
 	if loop_container:
-		var slot_w := min(150, loop_container.size.x / GameState.max_deck_size() - 8)
+		var slot_w = min(150, loop_container.size.x / GameState.max_deck_size() - 8)
 		for slot in card_slots:
 			slot.custom_minimum_size = Vector2(slot_w, slot_w * 1.34)
 
@@ -277,7 +277,8 @@ func _setup_relic_bar():
 			slot.tooltip_text = artifact.get("desc", "No description")
 
 			# Add right-click to discard
-			slot.gui_input.connect(_on_artifact_input.bind(category))
+			slot.set_meta("id", artifact_id)
+			slot.gui_input.connect(_on_artifact_gui.bind(artifact_id))
 		else:
 			# Empty slot - dark frame
 			_create_empty_artifact_slot(slot)
@@ -303,10 +304,13 @@ func _create_artifact_placeholder(slot: TextureRect, category: String):
 	texture.set_image(image)
 	slot.texture = texture
 
-func _on_artifact_input(category: String, event: InputEvent):
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-			_show_discard_dialog(category)
+func _on_artifact_gui(event: InputEvent, art_id: String):
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_show_artifact_popup(art_id)
+
+func _show_artifact_popup(art_id: String):
+	var artifact = ArtifactDB.get_artifact(art_id)
+	print("Artifact: ", artifact.get("name", "Unknown"), " - ", artifact.get("desc", "No description"))
 
 func _show_discard_dialog(category: String):
 	var artifact_id = GameState.artifacts.get(category, "")

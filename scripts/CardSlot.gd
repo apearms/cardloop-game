@@ -156,7 +156,7 @@ func _set_empty_slot_style():
 	style_box.border_width_right = 2
 	style_box.border_width_top = 2
 	style_box.border_width_bottom = 2
-	style_box.border_color = Color("#777777")  # Gray border for empty slots
+	style_box.border_color = Color(0.6, 0.6, 0.6)  # Gray border for empty slots
 
 	# Apply the style to the background
 	background.add_theme_stylebox_override("panel", style_box)

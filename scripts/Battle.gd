@@ -11,7 +11,7 @@ signal battle_lost
 @onready var wave_label: Label = $CenterContainer/AspectRatioContainer/VBox/TopBar/WaveLabel
 @onready var hp_label: Label = $CenterContainer/AspectRatioContainer/VBox/TopBar/HPLabel
 @onready var resources_label: Label = $CenterContainer/AspectRatioContainer/VBox/TopBar/ResourcesLabel
-@onready var battlefield = $"CenterContainer/AspectRatioContainer/Battlefield"
+@onready var battlefield = $CenterContainer/AspectRatioContainer/VBox/BattleArea/GridContainer
 @onready var grid_container: GridContainer = $CenterContainer/AspectRatioContainer/VBox/BattleArea/GridContainer
 @onready var loop_display: HBoxContainer = $CenterContainer/AspectRatioContainer/VBox/LoopDisplay
 @onready var status_label: Label = $CenterContainer/AspectRatioContainer/VBox/StatusLabel
@@ -567,8 +567,11 @@ func _update_log_display():
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		log_container.add_child(label)
 
+func _grid_to_world(lane: int, col: int) -> Vector2:
+	return battlefield.position + GridManager.cell_to_local(lane, col)
+
 func _update_enemy_position(enemy: Enemy):
-	enemy.position = battlefield.position + GridManager.cell_to_local(enemy.grid_y, enemy.grid_x)
+	enemy.position = _grid_to_world(enemy.grid_y, enemy.grid_x)
 
 func _remove_enemy(enemy: Enemy):
 	enemies.erase(enemy)
