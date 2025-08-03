@@ -33,6 +33,9 @@ var combat_log_entries: Array[String] = []
 const MAX_LOG_ENTRIES = 50
 
 func _ready():
+	# Add to battle group for enemy access
+	add_to_group("battle")
+
 	_setup_ui()
 	_setup_grid()
 
@@ -320,13 +323,55 @@ func _advance_enemies():
 	for enemy in enemies_to_remove:
 		_remove_enemy(enemy)
 
+	# Apply contact damage after all moves
+	for e in enemies:
+		if e.grid_x == GridManager.HERO_COL:
+			_apply_contact_damage(e)
+
 func _spawn_enemies():
+	# Clear GridManager first
+	GridManager.clear()
+
 	# Spawn all enemies immediately at wave start
 	if loop_index == 0 and not wave_spawn_data.is_empty():
-		# Spawn all enemies for this wave immediately
+		# Iterate wave list → for each enemy
 		for spawn_data in wave_spawn_data:
-			_try_spawn_enemy_immediate(spawn_data.enemy_id, spawn_data.lane)
+			var enemy_id = spawn_data.enemy_id
+			var spawned = false
+
+			# Try all lanes for this enemy
+			for lane in range(GridManager.GRID_H):
+				if GridManager.is_free(lane, GridManager.SPAWN_COL):
+					_spawn_enemy(enemy_id, lane, GridManager.SPAWN_COL)
+					spawned = true
+					break   # stop searching lanes for this enemy
+
+			# If couldn't fit anywhere, add to preferred lane queue
+			if not spawned:
+				var preferred_lane = spawn_data.get("lane", 0)
+				spawn_queue[preferred_lane] += 1
+
 		wave_spawn_data.clear()
+
+func request_move(enemy, new_x):
+	var old_x := enemy.grid_x
+	if new_x == old_x: return                 # already at target
+	if GridManager.is_free(enemy.grid_y, new_x):
+		GridManager.release_cell(enemy.grid_y, old_x)
+		GridManager.take_cell(enemy.grid_y, new_x)
+		enemy.grid_x = new_x
+		_update_enemy_position(enemy)
+
+func _apply_contact_damage(e):
+	# Apply damage with block
+	var actual_damage = max(0, e.contact_damage - current_block)
+	current_block = max(0, current_block - e.contact_damage)
+
+	if actual_damage > 0:
+		GameState.damage_hero(actual_damage)
+		_add_log_entry(e.enemy_id + " hit Hero for " + str(actual_damage) + " dmg")
+	else:
+		_add_log_entry(e.enemy_id + " attack blocked (" + str(e.contact_damage) + " dmg)")
 
 func _try_spawn_enemy_immediate(enemy_id: String, preferred_lane: int):
 	var spawn_col = GridManager.GRID_W - 1
@@ -380,14 +425,13 @@ func _spawn_enemy(enemy_id: String, lane: int, col: int):
 	tween.tween_property(enemy, "scale", Vector2.ONE, 0.3)
 
 func _dequeue_spawns():
-	# Try to spawn one queued enemy per lane
+	# Pop as many queued enemies as there are free lanes in that lane
 	for lane in range(spawn_queue.size()):
-		if spawn_queue[lane] > 0:
-			var spawn_col = GridManager.GRID_W - 1
-			if GridManager.is_free(lane, spawn_col):
-				# Spawn a generic enemy (we'll need to track enemy types in queue later)
-				_spawn_enemy("Slime", lane, spawn_col)
-				spawn_queue[lane] -= 1
+		var spawn_col = GridManager.GRID_W - 1
+		while spawn_queue[lane] > 0 and GridManager.is_free(lane, spawn_col):
+			# Spawn a generic enemy (we'll need to track enemy types in queue later)
+			_spawn_enemy("Slime", lane, spawn_col)
+			spawn_queue[lane] -= 1
 
 	# Update queue display
 	_update_spawn_queue_display()

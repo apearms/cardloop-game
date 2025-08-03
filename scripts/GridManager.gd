@@ -5,6 +5,8 @@ extends Node
 
 const GRID_W := 6
 const GRID_H := 3
+const HERO_COL := 0
+const SPAWN_COL := GRID_W - 1   # 5
 
 var occupancy := Array() # 2D bool array [lane][column]
 

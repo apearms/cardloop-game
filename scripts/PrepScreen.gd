@@ -26,6 +26,7 @@ func _ready():
 	GameState.deck_changed.connect(_update_card_slots)
 	GameState.deck_changed.connect(_refresh_deck_panel)
 	GameState.hero_hp_changed.connect(_update_hp_display)
+	GameState.artifacts_changed.connect(_setup_relic_bar)
 
 func _setup_ui():
 	# Connect buttons
@@ -209,7 +210,10 @@ func _setup_relic_bar():
 		# Check if we have an artifact in this category
 		if GameState.artifacts.has(category) and GameState.artifacts[category] != "":
 			var artifact_id = GameState.artifacts[category]
-			slot.texture = ArtifactDB.get_icon(artifact_id)
+			var icon_texture = ArtifactDB.get_icon(artifact_id)
+			if icon_texture == null:
+				icon_texture = ArtifactDB.get_placeholder_icon(category)
+			slot.texture = icon_texture
 			# Set tooltip with artifact description
 			var artifact = ArtifactDB.get_artifact(artifact_id)
 			slot.tooltip_text = artifact.get("desc", "No description")
@@ -277,6 +281,10 @@ func _on_icon_drag_ended(card_id: String, pos: Vector2):
 		GameState.deck_all.erase(card_id)
 		if old_id != "":
 			GameState.deck_all.append(old_id)
+
+		# Refresh UI after swapping
+		_refresh_deck_panel()
+		_update_card_slots()
 		GameState.emit_signal("deck_changed")
 
 func _find_loop_slot_at(global_pos: Vector2) -> CardSlot:

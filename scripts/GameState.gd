@@ -8,6 +8,7 @@ extends Node
 signal hero_hp_changed(new_hp)
 signal resources_changed(ammo, mana)
 signal deck_changed()
+signal artifacts_changed()
 
 # Hero stats
 var hero_hp: int = 20
@@ -62,6 +63,7 @@ func reset_game():
 	emit_signal("hero_hp_changed", hero_hp)
 	emit_signal("resources_changed", ammo, mana)
 	emit_signal("deck_changed")
+	emit_signal("artifacts_changed")
 
 # Damage hero and check for death
 func damage_hero(damage: int) -> bool:

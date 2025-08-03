@@ -45,6 +45,9 @@ func get_icon(artifact_id: String) -> Texture2D:
 	var category = artifact.get("category", "")
 	return _get_placeholder_icon(category)
 
+func get_placeholder_icon(category: String = "") -> Texture2D:
+	return _get_placeholder_icon(category)
+
 func _get_placeholder_icon(category: String = "") -> Texture2D:
 	var color = Color(0.4, 0.4, 0.4)  # Default gray
 

@@ -130,31 +130,15 @@ func _flash_damage():
 	tween.tween_property(self, "modulate", Color.WHITE, 0.1)
 
 func advance():
-	# Try to move forward
-	var new_x = grid_x - speed
+	var steps := min(speed, grid_x)      # can't go beyond HERO_COL
+	var target_x := grid_x - steps
+	if target_x < GridManager.HERO_COL:
+		target_x = GridManager.HERO_COL
 
-	# Check if reached hero
-	if new_x <= 0:
-		GridManager.release_cell(grid_y, grid_x)
-		emit_signal("enemy_reached_hero", self, contact_damage)
-		return
-
-	# Check if target cell is free
-	if GridManager.is_free(grid_y, new_x):
-		# Move forward
-		GridManager.release_cell(grid_y, grid_x)
-		grid_x = new_x
-		GridManager.take_cell(grid_y, grid_x)
-	else:
-		# Try lateral lane shift
-		var free_lane = GridManager.find_free_lane(grid_y, new_x)
-		if free_lane != -1:
-			# Move to free lane
-			GridManager.release_cell(grid_y, grid_x)
-			grid_y = free_lane
-			grid_x = new_x
-			GridManager.take_cell(grid_y, grid_x)
-		# If no free lane, wait this loop (no movement)
+	# Get Battle scene to handle movement
+	var battle = get_tree().get_first_node_in_group("battle")
+	if battle and battle.has_method("request_move"):
+		battle.request_move(self, target_x)
 
 	loop_count += 1
 	
